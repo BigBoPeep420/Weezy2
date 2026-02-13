@@ -1,0 +1,23 @@
+body {
+  width: 100dvw;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  background-color: rgb(77, 77, 77);
+
+  #content {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: min(1000px, 90dvw);
+
+    background-color: rgba(0, 0, 0, 0.2);
+
+    .appTitle {
+      font-size: var(--fs-xl);
+    }
+  }
+}

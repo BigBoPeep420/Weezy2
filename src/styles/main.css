@@ -1,0 +1,29 @@
+:root {
+  --fs-sm: clamp(0.89rem, 0.6vi + 0.74rem, 1.22rem);
+  --fs-base: clamp(1rem, 0.68vi + 0.83rem, 1.38rem);
+  --fs-md: clamp(1.13rem, 0.78vi + 0.93rem, 1.55rem);
+  --fs-lg: clamp(1.27rem, 0.89vi + 1.04rem, 1.76rem);
+  --fs-xl: clamp(1.42rem, 1.02vi + 1.17rem, 1.98rem);
+  --fs-2xl: clamp(1.6rem, 1.16vi + 1.31rem, 2.24rem);
+  --fs-3xl: clamp(1.8rem, 1.33vi + 1.47rem, 2.53rem);
+  --fs-4xl: clamp(2.03rem, 1.52vi + 1.65rem, 2.86rem);
+
+  --clrGreen: #6da34d;
+  --clrBlueLt: #61707d;
+  --clrPurple: #9d69a3;
+  --clrWhite: #f5fbef;
+  --clrBlueDk: #0a1128;
+
+  font-size: var(--fs-base);
+}
+
+* {
+  border: none;
+  padding: 0;
+  margin: 0;
+  margin-inline-start: 0;
+  padding-inline-start: 0;
+  box-sizing: border-box;
+  text-decoration: none;
+  color: inherit;
+}

@@ -1,0 +1,2 @@
+// Visual Cross API Query
+https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/LOCATION_HERE/today/next3days?unitGroup=us&include=days&key=API_KEY_HERE&contentType=json&lang=id
