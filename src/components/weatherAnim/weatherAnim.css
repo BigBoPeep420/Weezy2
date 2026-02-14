@@ -1,14 +1,47 @@
 .animController {
   position: absolute;
   width: 100dvw;
-  height: 100dvh;
-  .cloudLayer {
-    position: relative;
+  height: 100%;
+  z-index: -1;
+  overflow: hidden;
+  .animLayer {
+    position: absolute;
     width: 100%;
     height: 100%;
-    img {
-      position: fixed;
-      inset: 0;
+
+    .cloudLayer {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+
+      img {
+        position: fixed;
+        inset: 0;
+      }
     }
+
+    .grass {
+      width: 100%;
+      height: 100%;
+      svg {
+        --wind-speed: 2s;
+        --wind-bend: 5deg;
+        position: absolute;
+        bottom: -5px;
+        fill: var(--clrGrass);
+        transform-origin: bottom;
+        animation: grassSway var(--wind-speed) ease-in-out infinite;
+      }
+    }
+  }
+}
+
+@keyframes grassSway {
+  0%,
+  100% {
+    transform: skewX(0deg);
+  }
+  50% {
+    transform: skewX(calc(-1 * var(--wind-bend)));
   }
 }

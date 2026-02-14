@@ -11,5 +11,5 @@ const footer = emmet(`footer>p{Copyright © 2026 Lane Robey}`);
 
 document.body.append(content, footer);
 
-const animController = new WeatherAnimationController(document.body);
+const animController = new WeatherAnimationController(content);
 const weezy = new Weezy();

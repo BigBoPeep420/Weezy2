@@ -238,19 +238,38 @@ class Weezy {
   };
   constructor() {
     this.cache = null;
-    this.initializeData();
+    this.#initializeData();
+    window.addEventListener("searchweather", (e) => {
+      this.updateData(e.detail.location);
+    });
   }
 
   async updateData(location) {
-    this.cache = await this.#fetchData(location);
-    localStorage.setItem("weatherData", JSON.stringify(this.cache));
+    const now = Date.now();
+    if (
+      differenceInHours(now, this.cache.timeFetched) >= 1 ||
+      location != this.cache.resolvedAddress
+    ) {
+      this.#fetchData(location).then((newData) => {
+        this.cache = newData;
+        localStorage.setItem("weatherData", this.cache);
+      });
+    } else {
+      const err = new CustomEvent("apperror", {
+        detail: {
+          msg: `Weather not updated. Current data matches location and less than 1 hour old.`,
+        },
+      });
+      window.dispatchEvent(err);
+    }
+
     const upd = new CustomEvent("weatherupdate", {
-      detail: { weatherData: { ...this.cache } },
+      detail: { weatherData: this.cache },
     });
     window.dispatchEvent(upd);
   }
 
-  getLocalData() {
+  #getLocalData() {
     const rawData = localStorage.getItem("weatherData");
     const data = JSON.parse(rawData) || null;
     return data;
@@ -261,7 +280,13 @@ class Weezy {
     return fetch(
       `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/today/next3days?unitGroup=us&include=days&key=GBA9MM9M3TBHMDGHXFFFGVJN8&contentType=json`,
     )
-      .then((response) => response.json())
+      .then((response) => {
+        if (!response.ok)
+          throw new Error(
+            `Bad Fetch: ${response.status}:${response.statusText}`,
+          );
+        else return response.json();
+      })
       .then((data) => {
         const fetchedData = data;
         return { timeFetched, ...fetchedData };
@@ -290,7 +315,7 @@ class Weezy {
         console.error(reason);
         const err = new CustomEvent("apperror", {
           detail: {
-            msg: `Couldn't fetch rough location. Using backup: 29.7438 , -95.4422`,
+            msg: `Couldn't fetch rough location from IP Address. Using backup: 29.7438 , -95.4422`,
           },
         });
         window.dispatchEvent(err);
@@ -298,23 +323,25 @@ class Weezy {
       });
   }
 
-  async initializeData() {
-    const now = Date.now();
-    const localData = this.getLocalData();
-    if (!localData) {
-      this.#getRoughLocation().then((result) => {
-        this.updateData(result);
-      });
-    } else if (differenceInHours(now, localData.timeFetched) >= 1) {
-      this.updateData(localData.resolvedAddress);
-      console.log(differenceInHours(now, localData.timeFetched));
-    } else {
-      this.cache = localData;
-      const upd = new CustomEvent("weatherupdate", {
-        detail: { weatherData: { ...this.cache } },
-      });
-      window.dispatchEvent(upd);
+  async #initializeData() {
+    const localData = this.#getLocalData();
+    if (localData) {
+      const now = Date.now();
+      if (differenceInHours(now, localData.timeFetched) < 1) {
+        this.cache = localData;
+      }
     }
+    if (!this.cache) {
+      const loc = await this.#getRoughLocation();
+      const fetchedData = await this.#fetchData(loc);
+      this.cache = fetchedData;
+      localStorage.setItem("weatherData", JSON.stringify(this.cache));
+    }
+
+    const upd = new CustomEvent("weatherupdate", {
+      detail: { weatherData: this.cache },
+    });
+    window.dispatchEvent(upd);
   }
 }
 

@@ -1,2 +1,14 @@
 // Visual Cross API Query
 https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/LOCATION_HERE/today/next3days?unitGroup=us&include=days&key=API_KEY_HERE&contentType=json&lang=id
+
+
+
+Initialize
+  IF LocalStorage HAS Data
+    IF Data < 1hr old
+      Cache = Data
+    ELSE 
+      Cache = FetchData
+  ELSE
+    
+  

@@ -1,0 +1,7 @@
+app-error {
+  opacity: 0;
+  transition: opacity 1s ease-out;
+}
+app-error.visible {
+  opacity: 1;
+}

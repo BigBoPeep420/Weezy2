@@ -2,22 +2,53 @@ import { intlFormat } from "date-fns";
 import "./weatherDisplay.css";
 import { emmet } from "emmet-elem";
 import { stringToElement } from "@/modules/utils/domParse.js";
+import { AppError } from "../appError/appError.js";
 import iconSunrise from "@/assets/icons/weather-sunset-up.svg";
 import iconSunset from "@/assets/icons/weather-sunset-down.svg";
+import iconSearch from "@/assets/icons/magnify.svg";
 
 function weatherDisplay() {
   const outer = emmet(`div.weatherDisplay`);
+  const cardDisplay = emmet(`div.cardDisplay`);
 
   window.addEventListener("weatherupdate", (e) => {
     updateCards(e.detail.weatherData);
   });
 
+  const searchForm = emmet(`form.searchForm[novalidate]`);
+  const searchInput = emmet(
+    `input.searchInput[type="text" id="locSearchInput" required minlength="3" maxlength="100"]`,
+  );
+  const searchBtn = emmet(`button.searchBtn[type="submit"]`);
+  searchBtn.appendChild(stringToElement(iconSearch, "svg"));
+  searchForm.append(searchInput, searchBtn);
+
+  searchInput.addEventListener("change", (e) => {
+    if (searchInput.validity.tooLong || searchInput.validity.tooShort) {
+      inputError();
+      e.preventDefault();
+    }
+  });
+
+  searchForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    if (!searchInput.validity.valid) inputError();
+    else {
+      const srch = new CustomEvent("searchweather", {
+        detail: { location: searchInput.value },
+      });
+      window.dispatchEvent(srch);
+      e.target.reset();
+    }
+  });
+
+  outer.append(searchForm, new AppError(), cardDisplay);
   return outer;
 
   function updateCards(newData) {
     const today = new Date();
 
-    outer.replaceChildren(
+    cardDisplay.replaceChildren(
       ...newData.days.map((dayData) => {
         const card = emmet(`div.card`);
 
@@ -101,6 +132,17 @@ function weatherDisplay() {
       const ind = Math.round(norm / 22.5) % 16;
       return direcs[ind];
     }
+  }
+
+  function inputError() {
+    const err = new CustomEvent("apperror", {
+      detail: {
+        msg:
+          `Input must be between ${searchInput.minLength} and ${searchInput.maxLength} ` +
+          `characters. You entered ${searchInput.value.length} characters.`,
+      },
+    });
+    window.dispatchEvent(err);
   }
 }
 

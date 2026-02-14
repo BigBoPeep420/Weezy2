@@ -13,11 +13,19 @@ body {
     flex-direction: column;
     align-items: center;
     width: min(1000px, 90dvw);
-
-    background-color: rgba(0, 0, 0, 0.2);
+    position: relative;
 
     .appTitle {
       font-size: var(--fs-xl);
+      margin: 1rem;
     }
+  }
+
+  footer {
+    background-color: var(--clrGrass);
+    width: 100dvw;
+    color: aliceblue;
+    justify-items: center;
+    padding: 1rem 0 0.5rem 0;
   }
 }
