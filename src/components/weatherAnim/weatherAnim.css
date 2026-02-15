@@ -14,15 +14,32 @@
       height: 100%;
 
       .cloud {
+        background:
+          linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.322) 40%,
+            rgba(0, 0, 0, 0.685) 60%
+          ),
+          var(--img);
+        background-blend-mode: multiply;
+        background-repeat: no-repeat;
+        background-size: contain;
+        -webkit-mask-image: var(--img);
+        -webkit-mask-size: contain;
+        -webkit-mask-repeat: no-repeat;
+        mask-image: var(--img);
+        mask-size: contain;
+        mask-repeat: no-repeat;
         position: fixed;
         inset: 0;
+        aspect-ratio: auto;
       }
     }
 
     .grass {
       width: 100%;
       height: 100%;
-      position: absolute;
+      position: relative;
       bottom: -2px;
       svg {
         --wind-speed: 2s;
@@ -35,6 +52,18 @@
       }
     }
   }
+}
+
+:root[data-period="night"] .animLayer {
+  background: linear-gradient(to bottom, #37343f, #4e4d4d);
+
+  .grass {
+    svg {
+    }
+  }
+}
+
+:root[data-weather="rain"] .animLayer {
 }
 
 @keyframes grassSway {

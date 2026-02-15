@@ -19,10 +19,23 @@
   --clrWhite: #f5fbef;
   --clrBlueDk: #0a1128;
   --clrTransBG: #00000020;
-  --clrGrass: #6da34d;
+  --clrGrassBottom: #3d6300;
+  --clrGrassTop: #76ba1b;
+
+  --clrTxtNight: var(--clrWhite);
+  --clrTxtDay: var(--clrBlueDk);
 
   font-size: 16px;
   font-family: Nunito;
+}
+
+:root[data-period="night"] {
+  color: var(--clrTxtNight);
+  fill: var(--clrTxtNight);
+}
+:root[data-period="day"] {
+  color: var(--clrTxtDay);
+  fill: var(--clrTxtDay);
 }
 
 * {

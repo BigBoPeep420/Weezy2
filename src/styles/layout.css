@@ -26,9 +26,8 @@ body {
   }
 
   footer {
-    background-color: var(--clrGrass);
+    background-color: var(--clrGrassBottom);
     width: 100dvw;
-    color: aliceblue;
     justify-items: center;
     padding: 1rem 0 0.5rem 0;
   }
