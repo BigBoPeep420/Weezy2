@@ -240,31 +240,28 @@ class Weezy {
     this.cache = null;
     this.#initializeData();
     window.addEventListener("searchweather", (e) => {
-      this.updateData(e.detail.location);
+      this.search(e.detail.location);
     });
   }
 
-  async updateData(location) {
+  async search(location) {
     const now = Date.now();
     if (
       differenceInHours(now, this.cache.timeFetched) >= 1 ||
-      location != this.cache.resolvedAddress
+      this.cache.address != location
     ) {
-      this.#fetchData(location).then((newData) => {
-        this.cache = newData;
-        localStorage.setItem("weatherData", this.cache);
-      });
+      this.cache = await this.#fetchData(location);
+      localStorage.setItem("weatherData", JSON.stringify(this.cache));
     } else {
       const err = new CustomEvent("apperror", {
         detail: {
-          msg: `Weather not updated. Current data matches location and less than 1 hour old.`,
+          msg: `Weather Not Updated. Location is same and current data < 1 hour old.`,
         },
       });
       window.dispatchEvent(err);
     }
-
     const upd = new CustomEvent("weatherupdate", {
-      detail: { weatherData: this.cache },
+      detail: { weatherData: { ...this.cache } },
     });
     window.dispatchEvent(upd);
   }
@@ -278,7 +275,7 @@ class Weezy {
   async #fetchData(location) {
     const timeFetched = Date.now();
     return fetch(
-      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/today/next3days?unitGroup=us&include=days&key=GBA9MM9M3TBHMDGHXFFFGVJN8&contentType=json`,
+      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/today/next6days?unitGroup=us&include=days&key=GBA9MM9M3TBHMDGHXFFFGVJN8&contentType=json`,
     )
       .then((response) => {
         if (!response.ok)
@@ -292,15 +289,26 @@ class Weezy {
         return { timeFetched, ...fetchedData };
       })
       .catch((error) => {
+        let err;
+        let backupData;
+        if (this.cache) {
+          err = new CustomEvent("apperror", {
+            detail: {
+              msg: `Error fetching new weather data. Showing previous data.`,
+            },
+          });
+          backupData = this.cache;
+        } else {
+          err = new CustomEvent("apperror", {
+            detail: {
+              msg: `Error fetching new weather data. Showing backup data.`,
+            },
+          });
+          backupData = Weezy.#backupData;
+        }
         console.error(error);
-        const err = new CustomEvent("apperror", {
-          detail: {
-            msg: `Error fetching new weather data. Showing backup data.`,
-          },
-        });
         window.dispatchEvent(err);
-        const backupData = { ...Weezy.#backupData };
-        return { timeFetched, backupData };
+        return { timeFetched, ...backupData };
       });
   }
 
@@ -329,6 +337,9 @@ class Weezy {
       const now = Date.now();
       if (differenceInHours(now, localData.timeFetched) < 1) {
         this.cache = localData;
+      } else {
+        this.cache = await this.#fetchData(localData.resolvedAddress);
+        localStorage.setItem("weatherData", JSON.stringify(this.cache));
       }
     }
     if (!this.cache) {
@@ -339,7 +350,7 @@ class Weezy {
     }
 
     const upd = new CustomEvent("weatherupdate", {
-      detail: { weatherData: this.cache },
+      detail: { weatherData: { ...this.cache } },
     });
     window.dispatchEvent(upd);
   }

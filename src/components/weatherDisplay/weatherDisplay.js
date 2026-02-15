@@ -6,15 +6,18 @@ import { AppError } from "../appError/appError.js";
 import iconSunrise from "@/assets/icons/weather-sunset-up.svg";
 import iconSunset from "@/assets/icons/weather-sunset-down.svg";
 import iconSearch from "@/assets/icons/magnify.svg";
+import iconAvg from "@/assets/icons/tilde.svg";
+import iconMax from "@/assets/icons/arrow-collapse-up.svg";
 
 function weatherDisplay() {
   const outer = emmet(`div.weatherDisplay`);
   const cardDisplay = emmet(`div.cardDisplay`);
 
   window.addEventListener("weatherupdate", (e) => {
-    updateCards(e.detail.weatherData);
+    weatherUpdate(e.detail.weatherData);
   });
 
+  //#region SearchForm
   const searchForm = emmet(`form.searchForm[novalidate]`);
   const searchInput = emmet(
     `input.searchInput[type="text" id="locSearchInput" required minlength="3" maxlength="100"]`,
@@ -41,9 +44,19 @@ function weatherDisplay() {
       e.target.reset();
     }
   });
+  //#endregion
 
-  outer.append(searchForm, new AppError(), cardDisplay);
+  const locationDisplay = emmet(`div.locationDisplay`);
+  const locationText = emmet("h5.text");
+  locationDisplay.appendChild(locationText);
+
+  outer.append(searchForm, new AppError(), locationDisplay, cardDisplay);
   return outer;
+
+  function weatherUpdate(newData) {
+    updateCards(newData);
+    locationText.textContent = newData.resolvedAddress;
+  }
 
   function updateCards(newData) {
     const today = new Date();
@@ -64,9 +77,9 @@ function weatherDisplay() {
         precipType = precipType[0].toUpperCase() + precipType.slice(1);
 
         const otherData = emmet(
-          `div.otherData>div.precip>span{Chance of }+span.type{${precipType}}+` +
-            `span{: }+span.value{${dayData.precipprob}%}^div.humidity>span{Humidity: }+` +
-            `span.value{${dayData.humidity}%}^div.uv>span{UV Index: }+span.value{${dayData.uvindex}}`,
+          `div.otherData>div.precip>span.label{Chance of }+span.type{${precipType}}+` +
+            `span{: }+span.value{${dayData.precipprob}%}^div.humidity>span.label{Humidity: }+` +
+            `span.value{${dayData.humidity}%}^div.uv>span.label{UV Index: }+span.value{${dayData.uvindex}}`,
         );
         const period = emmet(`div.period`);
         const sunrise = `${parseInt(dayData.sunrise.substring(0, 2)) % 12}:${dayData.sunrise.substring(3, 5)}am`;
@@ -78,6 +91,20 @@ function weatherDisplay() {
           emmet(`p.sunset{${sunset}}`),
         );
         otherData.append(period);
+
+        const wind = emmet(
+          `div.wind>span.direction{${compassDirec(dayData.winddir)}}`,
+        );
+        const avgIcon = stringToElement(iconAvg, "svg");
+        avgIcon.classList.add("avgIcon");
+        const maxIcon = stringToElement(iconMax, "svg");
+        maxIcon.classList.add("maxIcon");
+        wind.append(
+          avgIcon,
+          emmet(`span.avg{${dayData.windspeed}mph}`),
+          maxIcon,
+          emmet(`span.max{${dayData.windgust}mph}`),
+        );
 
         card.append(
           emmet(
@@ -93,10 +120,7 @@ function weatherDisplay() {
             `div.tempsActual>span.label{Actual}+span.current{${dayData.temp}°}+` +
               `span.divider{/}+span.lowHigh{${dayData.tempmin}° – ${dayData.tempmax}°}`,
           ),
-          emmet(
-            `div.wind>span.direction{${compassDirec(dayData.winddir)}}+span.labelAvg{~}+` +
-              `span.avg{${dayData.windspeed}}+span.labelMax{M}+span.max{${dayData.windgust}}`,
-          ),
+          wind,
           otherData,
         );
         return card;

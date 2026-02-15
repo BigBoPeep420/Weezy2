@@ -1,5 +1,6 @@
 import path from "node:path";
 import HtmlWebpackPlugin from "html-webpack-plugin";
+import NodePolyfillPlugin from "node-polyfill-webpack-plugin";
 
 export default {
   entry: "./src/index.js",
@@ -17,6 +18,7 @@ export default {
     new HtmlWebpackPlugin({
       template: "./src/template.html",
     }),
+    new NodePolyfillPlugin(),
   ],
   module: {
     rules: [

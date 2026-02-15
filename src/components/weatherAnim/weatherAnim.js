@@ -15,30 +15,35 @@ class WeatherAnimationController {
   static cloudSettings = {
     default: {
       qty: 2,
-      size: 250,
+      sizeMax: 250,
+      sizeVar: 12,
       speedBase: 0.015,
     },
     "partly-cloudy-day": {
       qty: 3,
-      size: 275,
-      speedBase: 0.015,
+      sizeMax: 275,
+      sizeVar: 16,
+      speedBase: 0.01,
     },
     "partly-cloudy-night": {
       qty: 3,
-      size: 275,
-      speedBase: 0.015,
+      sizeMax: 275,
+      sizeVar: 16,
+      speedBase: 0.01,
     },
     cloudy: {
       qty: 4,
-      size: 300,
-      speedBase: 0.015,
+      sizeMax: 300,
+      sizeVar: 16,
+      speedBase: 0.01,
     },
     wind: {},
     fog: {},
     rain: {
       qty: 5,
-      size: 275,
-      speedBase: 0.02,
+      sizeMax: 325,
+      sizeVar: 18,
+      speedBase: 0.012,
     },
     snow: {},
   };
@@ -64,8 +69,9 @@ class WeatherAnimationController {
 
   weatherUpdate() {
     const oldAnimLayer = this.animLayer;
-    this.animLayer = emmet("div.animLayer");
-    this.cloudLayer = emmet("div.cloudLayer");
+    this.animLayer = emmet(`div.animLayer.${this.dayData.icon}`);
+    this.animLayer.style.opacity = 1;
+    this.cloudLayer = emmet(`div.cloudLayer`);
     this.animLayer.appendChild(this.cloudLayer);
     this.container.prepend(this.animLayer);
 
@@ -74,7 +80,7 @@ class WeatherAnimationController {
         ? WeatherAnimationController.cloudSettings[this.dayData.icon].qty
         : WeatherAnimationController.cloudSettings.default.qty;
     for (let i = 0; i < cloudQty; i++) {
-      this.generateCloud(true);
+      this.generateCloud(this.cloudLayer, true);
     }
 
     oldAnimLayer.style.zIndex = -1;
@@ -85,13 +91,13 @@ class WeatherAnimationController {
         this.animLayer.style.zIndex = -1;
         oldAnimLayer.remove();
         clearInterval(fade);
-      } else oldAnimLayer.style.opacity -= 0.05;
-    }, 100);
+      } else oldAnimLayer.style.opacity = oldAnimLayer.style.opacity - 0.05;
+    }, 500);
 
     this.generateGrass();
   }
 
-  generateCloud(initial = false) {
+  generateCloud(layer, initial = false) {
     const imgSrc =
       WeatherAnimationController.cloudImgs[
         Math.floor(Math.random() * WeatherAnimationController.cloudImgs.length)
@@ -100,21 +106,22 @@ class WeatherAnimationController {
       WeatherAnimationController.cloudSettings[this.dayData.icon] ||
       WeatherAnimationController.cloudSettings.default;
     const cloud = new Image();
+    cloud.classList.add("cloud");
     cloud.src = imgSrc;
 
     cloud.onload = () => {
-      const scale = Math.random() * 2 + 0.5;
+      const scale = Math.random() + 1;
       const orientation = Math.random() > 0.5 ? 1 : -1;
-      const size =
-        Math.random() * (settings.size * scale - settings.size) + settings.size;
-      cloud.style.width = `${size}px`;
-      cloud.style.opacity = 0.6 + scale / 8;
+      cloud.style.width = `min(${settings.sizeMax}px, ${settings.sizeVar * scale}dvw)`;
+      cloud.style.opacity = Math.max(0.7, Math.min(1, 0.8 + (scale - 1) / 5));
       cloud.style.zIndex = Math.floor(scale);
 
-      let windFactor = this.dayData.windspeed * 0.01;
-      windFactor = windFactor > 0.1 ? 0.1 : windFactor;
+      const windFactor = Math.max(
+        1,
+        Math.min(2, this.dayData.windspeed / 2 / 10),
+      );
 
-      const speedBase = window.innerWidth / settings.speedBase + windFactor;
+      const speedBase = window.innerWidth / (settings.speedBase * windFactor);
       const startX = initial ? `${Math.random() * 100}dvw` : "-100%";
       const offsetY = -1 * (Math.random() * (50 - 20) + 20);
       let duration;
@@ -122,7 +129,7 @@ class WeatherAnimationController {
         duration = speedBase * ((100 - parseFloat(startX)) / 100);
       else duration = speedBase;
 
-      this.cloudLayer.appendChild(cloud);
+      layer.appendChild(cloud);
 
       const delay = initial ? 0 : Math.random() * 10000;
       const anim = cloud.animate(
@@ -146,7 +153,7 @@ class WeatherAnimationController {
 
       anim.finished.then(() => {
         cloud.remove();
-        this.generateCloud(false);
+        this.generateCloud(layer, false);
       });
     };
   }
