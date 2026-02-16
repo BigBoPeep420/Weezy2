@@ -5,7 +5,7 @@ import { weatherDisplay } from "./components/weatherDisplay/weatherDisplay.js";
 import { WeatherAnimationController } from "./components/weatherAnim/weatherAnim.js";
 import { emmet } from "emmet-elem";
 
-const content = emmet(`div#content>div.appTitle>h1{Weezy}`);
+const content = emmet(`div#content>div.appTitle>h1{Weezy}+div.rainEmitter`);
 content.appendChild(weatherDisplay());
 const footer = emmet(`footer>p{Copyright © 2026 Lane Robey}`);
 

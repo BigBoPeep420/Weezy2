@@ -4,6 +4,13 @@
   height: 100%;
   z-index: -1;
   .animLayer {
+    background: linear-gradient(
+      to bottom,
+      var(--clrBGTop),
+      var(--clrBGMid1),
+      var(--clrBGMid2),
+      var(--clrBGBottom)
+    );
     position: absolute;
     width: 100%;
     height: 100%;
@@ -13,26 +20,31 @@
       width: 100%;
       height: 100%;
 
-      .cloud {
-        background:
-          linear-gradient(
-            to bottom,
-            rgba(0, 0, 0, 0.322) 40%,
-            rgba(0, 0, 0, 0.685) 60%
-          ),
-          var(--img);
-        background-blend-mode: multiply;
-        background-repeat: no-repeat;
-        background-size: contain;
-        -webkit-mask-image: var(--img);
-        -webkit-mask-size: contain;
-        -webkit-mask-repeat: no-repeat;
-        mask-image: var(--img);
-        mask-size: contain;
-        mask-repeat: no-repeat;
+      .cloudContainer {
         position: fixed;
-        inset: 0;
-        aspect-ratio: auto;
+        .cloud {
+          position: fixed;
+          background:
+            linear-gradient(
+              to bottom,
+              var(--clrCloudTop) 15%,
+              var(--clrCloudBottom) 40%
+            ),
+            var(--img);
+
+          background-blend-mode: multiply;
+          background-repeat: no-repeat;
+          background-size: contain;
+          -webkit-mask-image: var(--img);
+          -webkit-mask-size: contain;
+          -webkit-mask-repeat: no-repeat;
+          mask-image: var(--img);
+          mask-size: contain;
+          mask-repeat: no-repeat;
+          width: 100%;
+          height: 100%;
+          opacity: var(--cloudOpacity);
+        }
       }
     }
 
@@ -55,15 +67,138 @@
 }
 
 :root[data-period="night"] .animLayer {
-  background: linear-gradient(to bottom, #37343f, #4e4d4d);
+  .moon {
+    position: absolute;
+    background:
+      radial-gradient(
+        11% 10% at 30% 65%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.342) 75%,
+        transparent
+      ),
+      radial-gradient(
+        16% 13% at 75% 85%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.144) 75%,
+        transparent
+      ),
+      radial-gradient(
+        8% 10% at 40% 95%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.247) 75%,
+        transparent
+      ),
+      radial-gradient(
+        farthest-corner,
+        transparent 20%,
+        rgba(0, 0, 0, 0.397) 55%,
+        rgba(0, 0, 0, 0.685) 80%
+      ),
+      #9bb2bd;
+    filter: drop-shadow(0 0 30px rgba(195, 228, 243, 0.692));
+    box-shadow: inset 0 0 20px rgba(195, 228, 243, 0.692);
+    width: 20dvw;
+    height: 20dvw;
+    border-radius: 50%;
+    top: -14dvw;
+    left: -4dvw;
+  }
+}
+:root[data-period="day"] .animLayer {
+  .sun {
+    --size: 20dvw;
+    --scal: 20px;
+    background: radial-gradient(
+      farthest-corner,
+      var(--clrSun),
+      var(--clrSunHlt)
+    );
+    position: absolute;
+    height: var(--size);
+    width: var(--size);
+    border-radius: 50%;
+    top: -15dvw;
+    left: 70dvw;
+    box-shadow: 0 0 50px 10px rgb(255, 252, 96);
+  }
+  .sun::after {
+    content: "";
+    inset: -2px;
+    position: absolute;
+    background:
+      radial-gradient(farthest-corner, var(--clrSun) 40%, transparent 80%),
+      repeating-conic-gradient(
+        transparent 4deg 12deg,
+        var(--clrSunHlt) 28deg 32deg,
+        transparent 42deg 54deg
+      );
+    border-radius: 50%;
+    opacity: 0.5;
+    animation: sunAnim 15s linear infinite;
+  }
+}
+:root[data-weather="rain"] {
+  .rainEmitter {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background-image:
+      radial-gradient(1px 5px at 20% 0%, var(--clrRainDrop), transparent),
+      radial-gradient(1px 5px at 60% 0%, var(--clrRainDrop), transparent),
+      radial-gradient(1px 5px at 85% 20%, var(--clrRainDrop), transparent),
+      radial-gradient(1px 5px at 40% 60%, var(--clrRainDrop), transparent);
 
-  .grass {
-    svg {
-    }
+    background-repeat: repeat;
+    animation: rainfall 2s ease-in infinite;
+  }
+}
+:root[data-weather="snow"] {
+  .rainEmitter {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 100%;
+    background-image:
+      radial-gradient(5px 5px at 20% 10%, var(--clrRainDrop), transparent),
+      radial-gradient(5px 5px at 60% 30%, var(--clrRainDrop), transparent),
+      radial-gradient(5px 5px at 85% 20%, var(--clrRainDrop), transparent),
+      radial-gradient(5px 5px at 40% 60%, var(--clrRainDrop), transparent);
+
+    background-repeat: repeat;
+    animation: rainfall 10s linear infinite;
   }
 }
 
-:root[data-weather="rain"] .animLayer {
+@keyframes sunAnim {
+  0% {
+    transform: rotate(0deg);
+  }
+  10% {
+    scale: 1.05;
+  }
+  25% {
+    scale: 0.95;
+  }
+  50% {
+    scale: 1.05;
+  }
+  60% {
+    scale: 1;
+  }
+  75% {
+    scale: 1.05;
+  }
+  85% {
+    scale: 1;
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes grassSway {
@@ -73,5 +208,23 @@
   }
   50% {
     transform: skewX(calc(-1 * var(--wind-bend)));
+  }
+}
+
+@keyframes rainfall {
+  0% {
+    transform: translateY(-10px);
+    opacity: 0;
+  }
+  5% {
+    opacity: inherit;
+  }
+  99% {
+    transform: translateY(100dvh);
+    opacity: inherit;
+  }
+  100% {
+    transform: translateY(100dvh);
+    opacity: 0;
   }
 }

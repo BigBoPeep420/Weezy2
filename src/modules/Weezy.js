@@ -28,7 +28,7 @@ class Weezy {
         snow: 0.0,
         snowdepth: 0.0,
         windgust: 17.2,
-        windspeed: 8.9,
+        windspeed: 20.9,
         winddir: 329.1,
         pressure: 1020.7,
         cloudcover: 49.9,
@@ -44,7 +44,7 @@ class Weezy {
         moonphase: 0.82,
         conditions: "type_42",
         description: "Variablecloud.",
-        icon: "partly-cloudy-day",
+        icon: "fog",
         stations: ["KHOU", "KSGR", "KAXH", "KIAH", "KLVJ", "KMCJ", "D0326"],
         source: "comb",
       },
@@ -274,42 +274,43 @@ class Weezy {
 
   async #fetchData(location) {
     const timeFetched = Date.now();
-    return fetch(
-      `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/today/next6days?unitGroup=us&include=days&key=GBA9MM9M3TBHMDGHXFFFGVJN8&contentType=json`,
-    )
-      .then((response) => {
-        if (!response.ok)
-          throw new Error(
-            `Bad Fetch: ${response.status}:${response.statusText}`,
-          );
-        else return response.json();
-      })
-      .then((data) => {
-        const fetchedData = data;
-        return { timeFetched, ...fetchedData };
-      })
-      .catch((error) => {
-        let err;
-        let backupData;
-        if (this.cache) {
-          err = new CustomEvent("apperror", {
-            detail: {
-              msg: `Error fetching new weather data. Showing previous data.`,
-            },
-          });
-          backupData = this.cache;
-        } else {
-          err = new CustomEvent("apperror", {
-            detail: {
-              msg: `Error fetching new weather data. Showing backup data.`,
-            },
-          });
-          backupData = Weezy.#backupData;
-        }
-        console.error(error);
-        window.dispatchEvent(err);
-        return { timeFetched, ...backupData };
-      });
+    return { timeFetched, ...Weezy.#backupData };
+    // return fetch(
+    //   `https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/${location}/today/next6days?unitGroup=us&include=days&key=GBA9MM9M3TBHMDGHXFFFGVJN8&contentType=json`,
+    // )
+    //   .then((response) => {
+    //     if (!response.ok)
+    //       throw new Error(
+    //         `Bad Fetch: ${response.status}:${response.statusText}`,
+    //       );
+    //     else return response.json();
+    //   })
+    //   .then((data) => {
+    //     const fetchedData = data;
+    //     return { timeFetched, ...fetchedData };
+    //   })
+    //   .catch((error) => {
+    //     let err;
+    //     let backupData;
+    //     if (this.cache) {
+    //       err = new CustomEvent("apperror", {
+    //         detail: {
+    //           msg: `Error fetching new weather data. Showing previous data.`,
+    //         },
+    //       });
+    //       backupData = this.cache;
+    //     } else {
+    //       err = new CustomEvent("apperror", {
+    //         detail: {
+    //           msg: `Error fetching new weather data. Showing backup data.`,
+    //         },
+    //       });
+    //       backupData = Weezy.#backupData;
+    //     }
+    //     console.error(error);
+    //     window.dispatchEvent(err);
+    //     return { timeFetched, ...backupData };
+    //   });
   }
 
   async #getRoughLocation() {

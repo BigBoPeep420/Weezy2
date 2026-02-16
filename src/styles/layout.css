@@ -19,8 +19,11 @@ body {
 
     .appTitle {
       margin: 1rem;
+      position: relative;
       h1 {
+        --fontHlt: var(--clrBlueLt);
         font-size: var(--fs-4xl);
+        font-weight: 1000;
       }
     }
   }

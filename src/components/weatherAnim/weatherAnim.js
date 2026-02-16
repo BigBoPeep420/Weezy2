@@ -1,7 +1,7 @@
 import "./weatherAnim.css";
 import { emmet } from "emmet-elem";
 import { stringToElement } from "@/modules/utils/domParse.js";
-import { isWithinInterval } from "date-fns";
+import { parse, isWithinInterval } from "date-fns";
 import imgCloudB from "@/assets/images/weather/cloudB.webp";
 import imgCloudC from "@/assets/images/weather/cloudC.webp";
 import imgCloudD from "@/assets/images/weather/cloudD.webp";
@@ -18,35 +18,42 @@ class WeatherAnimationController {
       qty: 2,
       sizeMax: 250,
       sizeVar: 12,
-      speedBase: 0.015,
     },
     "partly-cloudy-day": {
       qty: 3,
-      sizeMax: 275,
+      sizeMax: 300,
       sizeVar: 16,
-      speedBase: 0.01,
     },
     "partly-cloudy-night": {
       qty: 3,
-      sizeMax: 275,
-      sizeVar: 16,
-      speedBase: 0.01,
-    },
-    cloudy: {
-      qty: 4,
       sizeMax: 300,
       sizeVar: 16,
-      speedBase: 0.01,
     },
-    wind: {},
-    fog: {},
+    cloudy: {
+      qty: 5,
+      sizeMax: 300,
+      sizeVar: 16,
+    },
+    wind: {
+      qty: 5,
+      sizeMax: 275,
+      sizeVar: 16,
+    },
+    fog: {
+      qty: 3,
+      sizeMax: 275,
+      sizeVar: 16,
+    },
     rain: {
       qty: 5,
       sizeMax: 325,
       sizeVar: 18,
-      speedBase: 0.01,
     },
-    snow: {},
+    snow: {
+      qty: 5,
+      sizeMax: 325,
+      sizeVar: 18,
+    },
   };
   static grassSVGs = [grass1, grass2, grass3];
 
@@ -80,20 +87,17 @@ class WeatherAnimationController {
   }
 
   weatherUpdate() {
-    const now = Date.now();
-    const dayNight = isWithinInterval(now, {
-      start: this.dayData.sunrise,
-      end: this.dayData.sunset,
-    })
-      ? "day"
-      : "night";
-    document.documentElement.dataset.period = dayNight;
+    const period = this.isDaytime() ? "day" : "night";
+    document.documentElement.dataset.period = period;
     document.documentElement.dataset.weather = this.dayData.icon;
     const oldAnimLayer = this.animLayer;
     this.animLayer = emmet(`div.animLayer`);
     this.animLayer.style.opacity = 1;
     this.cloudLayer = emmet(`div.cloudLayer`);
-    this.animLayer.appendChild(this.cloudLayer);
+    this.animLayer.append(
+      this.cloudLayer,
+      period == "day" ? emmet("div.sun") : emmet("div.moon"),
+    );
     this.container.prepend(this.animLayer);
 
     const cloudQty =
@@ -113,7 +117,7 @@ class WeatherAnimationController {
         oldAnimLayer.remove();
         clearInterval(fade);
       } else oldAnimLayer.style.opacity = oldAnimLayer.style.opacity - 0.05;
-    }, 500);
+    }, 100);
 
     this.generateGrass();
   }
@@ -126,25 +130,20 @@ class WeatherAnimationController {
     const settings =
       WeatherAnimationController.cloudSettings[this.dayData.icon] ||
       WeatherAnimationController.cloudSettings.default;
-    const cloud = emmet(`div.cloud`);
+    const cloud = emmet(`div.cloudContainer>div.cloud+div.rainEmitter`);
     const cloudImg = new Image();
     cloud.style.setProperty("--img", `url(${imgSrc})`);
     cloudImg.src = imgSrc;
 
     cloudImg.onload = () => {
-      const scale = Math.random() * 1.5 + 1;
-      const orientation = Math.random() > 0.5 ? 1 : -1;
+      const scale = Math.random() + 1;
+      const orientation = Math.random() > 0.4 ? 1 : -1;
       cloud.style.width = `min(${settings.sizeMax}px, ${settings.sizeVar * scale}dvw)`;
       cloud.style.height = `min(${settings.sizeMax}px, ${settings.sizeVar * scale}dvw)`;
-      cloud.style.opacity = Math.max(0.7, Math.min(1, 0.8 + (scale - 1) / 5));
-      cloud.style.zIndex = Math.floor(scale);
+      cloud.style.opacity = Math.max(0.8, Math.min(1, 1 / scale));
 
-      const windFactor = Math.max(
-        1,
-        Math.min(2, this.dayData.windspeed / 2 / 10),
-      );
-
-      const speedBase = window.innerWidth / (settings.speedBase * windFactor);
+      const speedBase =
+        (window.innerWidth / (this.dayData.windspeed + 10)) * 1000;
       const startX = initial ? `${Math.random() * 100}dvw` : "-100%";
       const offsetY = -1 * (Math.random() * (40 - 10));
       let duration;
@@ -153,6 +152,7 @@ class WeatherAnimationController {
       else duration = speedBase;
 
       layer.appendChild(cloud);
+      cloud.style.zIndex = Math.floor(cloud.clientWidth);
 
       const delay = initial ? 0 : Math.random() * 10000;
       const anim = cloud.animate(
@@ -192,7 +192,7 @@ class WeatherAnimationController {
         ? Array.from(grassLayer.children).reduce((accum, item) => {
             return accum + item.clientWidth - 20;
           }, -20)
-        : -20;
+        : -40;
       const svg =
         WeatherAnimationController.grassSVGs[
           Math.floor(
@@ -203,7 +203,7 @@ class WeatherAnimationController {
       const strip = stringToElement(svg, "svg");
       const path = strip.querySelector("path");
       path.setAttribute("fill", "url(#grass-overlay)");
-      strip.style.width = "400px";
+      strip.style.height = "4dvh";
       strip.style.translate = `${endPoint}px 0`;
       const duration = Math.max(0.5, 3 - windspeed / 10);
       const bend = Math.min(25, windspeed * 1.5);
@@ -217,6 +217,31 @@ class WeatherAnimationController {
       grassLayer.appendChild(strip);
       if (endPoint + strip.clientWidth < window.innerWidth) placeStrips();
     }
+  }
+
+  generateFog() {
+    const fog1 = emmet(`div.fogContainer`);
+    const fogImg = new Image();
+    fogImg.src = WeatherAnimationController.cloudImgs[1];
+
+    fogImg.onload = () => {
+      const scale = Math.random() + 1;
+      fog1.style.height = "min(500px, 60dvh)";
+
+      const speedBase =
+        (window.innerWidth / (this.dayData.windspeed + 5)) * 900;
+
+      fog1.appendChild(fogImg);
+    };
+  }
+
+  isDaytime() {
+    // const now = new Date();
+    // const baseDate = new Date(this.dayData.datetime.replace(/-/g, "\/"));
+    // const sunrise = parse(this.dayData.sunrise, "HH:mm:ss", baseDate);
+    // const sunset = parse(this.dayData.sunset, "HH:mm:ss", baseDate);
+    // return isWithinInterval(now, { start: sunrise, end: sunset });
+    return false;
   }
 }
 
