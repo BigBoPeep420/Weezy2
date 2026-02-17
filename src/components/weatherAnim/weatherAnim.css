@@ -46,6 +46,12 @@
           opacity: var(--cloudOpacity);
         }
       }
+
+      .fogContainer {
+        position: absolute;
+        bottom: 0;
+        opacity: var(--fogOpacity);
+      }
     }
 
     .grass {

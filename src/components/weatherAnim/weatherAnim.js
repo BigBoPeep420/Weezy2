@@ -120,6 +120,10 @@ class WeatherAnimationController {
     }, 100);
 
     this.generateGrass();
+    if (this.dayData.icon == "fog") {
+      this.generateFog(this.cloudLayer);
+      this.generateFog(this.cloudLayer, 1);
+    }
   }
 
   generateCloud(layer, initial = false) {
@@ -219,29 +223,52 @@ class WeatherAnimationController {
     }
   }
 
-  generateFog() {
-    const fog1 = emmet(`div.fogContainer`);
+  generateFog(layer, startPercent = 0) {
+    const fog = emmet(`div.fogContainer`);
     const fogImg = new Image();
     fogImg.src = WeatherAnimationController.cloudImgs[1];
 
     fogImg.onload = () => {
-      const scale = Math.random() + 1;
-      fog1.style.height = "min(500px, 60dvh)";
+      fog.style.height = "min(500px, 60dvh)";
+      const orientation = Math.random() > 0.5 ? 1 : -1;
+      const offsetY = `-${Math.random() * 30}%`;
+      const speedBase = (window.innerWidth / 15) * 1000;
+      const startX = startPercent == 0 ? "-100%" : `${startPercent}dvw`;
+      const duration =
+        startPercent == 0
+          ? speedBase * ((100 - parseFloat(startX)) / 100)
+          : speedBase;
 
-      const speedBase =
-        (window.innerWidth / (this.dayData.windspeed + 5)) * 900;
+      const anim = fog.animate(
+        [
+          {
+            transform: `translate(${startX}, ${offsetY}) scaleX(${orientation})`,
+          },
+          { transform: `translate(100dvw, ${offsetY}) scaleX(${orientation})` },
+        ],
+        {
+          duration,
+          easing: "linear",
+          fill: "both",
+        },
+      );
 
-      fog1.appendChild(fogImg);
+      fog.appendChild(fogImg);
+      layer.appendChild(fog);
+
+      anim.finished.then(() => {
+        fog.remove();
+        this.generateFog(layer);
+      });
     };
   }
 
   isDaytime() {
-    // const now = new Date();
-    // const baseDate = new Date(this.dayData.datetime.replace(/-/g, "\/"));
-    // const sunrise = parse(this.dayData.sunrise, "HH:mm:ss", baseDate);
-    // const sunset = parse(this.dayData.sunset, "HH:mm:ss", baseDate);
-    // return isWithinInterval(now, { start: sunrise, end: sunset });
-    return false;
+    const now = new Date();
+    const baseDate = new Date(this.dayData.datetime.replace(/-/g, "\/"));
+    const sunrise = parse(this.dayData.sunrise, "HH:mm:ss", baseDate);
+    const sunset = parse(this.dayData.sunset, "HH:mm:ss", baseDate);
+    return isWithinInterval(now, { start: sunrise, end: sunset });
   }
 }
 

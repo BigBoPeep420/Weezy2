@@ -24,6 +24,8 @@ body {
         --fontHlt: var(--clrBlueLt);
         font-size: var(--fs-4xl);
         font-weight: 1000;
+        font-family: "Sansation";
+        letter-spacing: 0.2rem;
       }
     }
   }

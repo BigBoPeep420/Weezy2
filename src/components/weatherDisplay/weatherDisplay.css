@@ -20,6 +20,7 @@
       border-radius: 0.5rem;
       padding: 0.3rem 0.5rem;
       z-index: 100;
+      background-color: var(--clrTransBG);
     }
     .searchBtn {
       width: 2.3rem;

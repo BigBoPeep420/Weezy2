@@ -1,6 +1,12 @@
 @font-face {
   font-family: Nunito;
-  src: url("@/assets/fonts/Nunito-VariableFontwght.woff2") format(woff2);
+  src:
+    url("@/assets/fonts/Nunito-VariableFontwght.woff2") format(woff2),
+    url("@/assets/fonts/Nunito-VariableFontwght.woff") format(woff);
+}
+@font-face {
+  font-family: "Sansation";
+  src: url("@/assets/fonts/Sansation-Regular.woff2") format(woff2);
 }
 
 :root {
@@ -31,6 +37,7 @@
   --clrBGMid2: #8eada4;
   --clrBGBottom: #719994;
   --cloudOpacity: 1;
+  --fogOpacity: 0.5;
 
   --clrTxtNight: var(--clrWhite);
   --clrTxtDay: var(--clrBlueDk);
@@ -45,13 +52,17 @@
   --clrRainDrop: rgba(255, 255, 255, 0.4);
   --clrGrassBottom: #083838;
   --clrGrassTop: #0d6635;
-  --clrBGTop: #000000;
-  --clrBGMid1: #212027;
-  --clrBGMid2: #232333;
-  --clrBGBottom: #313147;
-  --cloudOpacity: 0.3;
+  --clrBGBottom: #000000;
+  --clrBGMid2: #212027;
+  --clrBGMid1: #232333;
+  --clrBGTop: #313147;
+  --cloudOpacity: 0.4;
   --clrCloudTop: #000000c5;
   --clrCloudBottom: #00000077;
+  --fogOpacity: 0.2;
+  *:focus-visible {
+    outline: solid 2px var(--clrTxtNight);
+  }
 }
 :root[data-period="day"] {
   color: var(--clrTxtDay);
@@ -61,6 +72,9 @@
   --clrBGMid1: #90a8b3;
   --clrBGMid2: #7da0b1;
   --clrBGBottom: #719699;
+  *:focus-visible {
+    outline: solid 2px var(--clrTxtDay);
+  }
 }
 :root[data-weather="rain"] {
   --clrCloudTop: #00000044;
