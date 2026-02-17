@@ -31,8 +31,5 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.3",
     "webpack-merge": "^6.0.1"
-  },
-  "dependencies": {
-    "node-polyfill-webpack-plugin": "^4.1.0"
   }
 }

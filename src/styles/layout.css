@@ -33,7 +33,74 @@ body {
   footer {
     background-color: var(--clrGrassBottom);
     width: 100dvw;
-    justify-items: center;
     padding: 1rem 0 0.5rem 0;
+    display: flex;
+    justify-content: space-evenly;
+    align-items: center;
+
+    .creditsLink {
+      background: none;
+      transition: transform 1s ease;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+    .creditsLink:hover {
+      transform: scale(1.1);
+    }
+  }
+
+  .creditsModal {
+    margin: auto;
+    padding: 1rem;
+    border-radius: 0.5rem;
+    flex-direction: column;
+    gap: 1rem;
+    background: radial-gradient(var(--clrBGMid2), var(--clrBGTop));
+    outline: solid 3px var(--clrBGMid2);
+    transition: opacity 1s ease;
+
+    .modalTitle {
+      display: flex;
+      justify-content: space-between;
+      .close {
+        width: 1.5rem;
+        height: 1.5rem;
+        background: none;
+        cursor: pointer;
+        transition: transform 1s ease;
+      }
+      .close:hover {
+        transform: scale(1.1);
+      }
+    }
+
+    .credits {
+      display: flex;
+      flex-direction: column;
+      align-items: end;
+      gap: 0.5rem;
+
+      a {
+        text-decoration: underline;
+      }
+    }
+  }
+  .creditsModal:popover-open {
+    display: flex;
+    opacity: 1;
+
+    @starting-style {
+      opacity: 0;
+    }
+  }
+  .creditsModal:popover-open::backdrop {
+    background-color: rgba(0, 0, 0, 0.384);
+    backdrop-filter: blur(5px);
+    opacity: 1;
+    transition: opacity 1s ease;
+
+    @starting-style {
+      opacity: 0;
+    }
   }
 }
