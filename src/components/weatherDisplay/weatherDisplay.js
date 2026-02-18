@@ -20,7 +20,7 @@ function weatherDisplay() {
   //#region SearchForm
   const searchForm = emmet(`form.searchForm[novalidate]`);
   const searchInput = emmet(
-    `input.searchInput[type="text" id="locSearchInput" required minlength="3" maxlength="100"]`,
+    `input.searchInput[type="text" id="locSearchInput" required minlength="3" maxlength="100" placeholder="Address, Zip, or Lat/Long"]`,
   );
   const searchBtn = emmet(`button.searchBtn[type="submit"]`);
   searchBtn.appendChild(stringToElement(iconSearch, "svg"));
